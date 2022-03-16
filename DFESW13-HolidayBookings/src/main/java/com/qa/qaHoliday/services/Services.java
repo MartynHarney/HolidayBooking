@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.qa.qaHoliday.model.HolidayBooking;
 import com.qa.qaHoliday.repo.Repo;
 
-@Service
+//@Service
 public class Services {
 	
 	private Repo repo;

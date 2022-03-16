@@ -2,6 +2,8 @@ package com.qa.qaHoliday.controller;
 
 import java.util.ArrayList;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,86 +13,65 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.qa.qaHoliday.model.HolidayBooking;
+import com.qa.qaHoliday.services.Services;
+import com.qa.qaHoliday.services.ServicesDB;
 
-//@RestController
+@RestController
 public class Controller {
 	
-	private ArrayList<HolidayBooking> bookingList = new ArrayList<>();
 	
-	@GetMapping("/getBookings")
-	public ArrayList<HolidayBooking> getBookings() {
-		return bookingList;
-	}
-
-	@PostMapping("/createSetBooking")
-	public boolean createSetBooking() {
-		bookingList.add(new HolidayBooking("Wales", "rainy", 14f, true));
-		return true;
+	
+	private ServicesDB service;
+	
+	public Controller(ServicesDB service) {
+		super();
+		this.service = service;
 	}
 
 	@PostMapping("/createBooking")
-	public boolean createBooking(@RequestBody HolidayBooking booking) {
+	public ResponseEntity<String> createBooking(@RequestBody HolidayBooking booking) {
 		System.out.println(booking);
-		booking.setId(bookingList.size() + 1);
-		bookingList.add(booking);
-		return true;
-	}
-	
-	@GetMapping("/get/{index}")
-	public HolidayBooking getByIndex(@PathVariable("index") int index) {
-		return bookingList.get(index);
-	}
-	
-	@DeleteMapping("/delete/{index}")
-	public boolean deleteByIndex(@PathVariable("index") int index) {
-		bookingList.remove(index);
-		return true;
+		service.createBooking(booking);
+		ResponseEntity<String> response = new ResponseEntity<String>("Booking added with ID: " + booking.getId(), HttpStatus.CREATED);
+		return response;
 	}
 
-	@DeleteMapping("/deleteAll")
-	public boolean deleteAll() {
-		bookingList.clear();
-		return true;
-	}
-
-	@PutMapping("/update/{index}")
-	public boolean update(@PathVariable("index")int index, @RequestBody HolidayBooking booking) {
-		bookingList.set(index, booking);
-		System.out.println("Object of index " + index + "updated.");
-		return true;
+	@GetMapping("/get/{id}")
+	public ResponseEntity<HolidayBooking> getByid(@PathVariable("id") long id) {
+		HolidayBooking result = service.getByid(id);
+		ResponseEntity<HolidayBooking> response = new ResponseEntity<>(result, HttpStatus.OK);
+		return response;
 	}
 	
-	@PostMapping("/postArray")
-	public boolean addArrayBookings(@RequestBody HolidayBooking[] bookingArray) {
-		for(HolidayBooking booking : bookingArray) {
-			bookingList.add(booking);
-		}
-		return true;
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteByid(@PathVariable("id") long id) {
+		service.remove(id);
+		String response = "Booking of id: " + id + "has been deleted";
+		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
 	}
-	
 
-	@PutMapping("/updateByCountry/{value}")
-	public boolean updateAllObjects(@PathVariable("query") String query, @PathVariable("value") String value, @RequestBody HolidayBooking booking) {
+
+	@GetMapping("/getBookings")
+	public ResponseEntity<ArrayList<HolidayBooking>> getBookings() {
+		ArrayList<HolidayBooking> response = (ArrayList<HolidayBooking>) service.getBookings();
+		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
 		
-		int i = 0;
 		
-		for(HolidayBooking bookingObj : bookingList) {
-			if(bookingObj.getCountry() == value) {
-				System.out.println(i);
-				bookingList.set(i, booking);
-				
-				bookingObj.setCountry(booking.getCountry());
-				bookingObj.setAllInclusive(booking.isAllInclusive());
-				bookingObj.setPrice(booking.getPrice());
-				bookingObj.setWeather(booking.getWeather());
-			}
-			i++;
-		}
-	return true;
 	}
-	
+
+	@PutMapping("/update/{id}")
+	public ResponseEntity<String> updateByid(@PathVariable("id")long id, @RequestBody HolidayBooking booking){
+		service.update(id, booking);
+		String response = "Updating booking of id: " + id;
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
 
+	@DeleteMapping("/delete")
+	public ResponseEntity<String> deleteAll(){
+		service.deleteAll();
+		return new ResponseEntity<>("All bookings deleted", HttpStatus.ACCEPTED);
+	}
 
 
 }
