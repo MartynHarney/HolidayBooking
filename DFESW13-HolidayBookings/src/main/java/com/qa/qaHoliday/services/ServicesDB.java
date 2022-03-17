@@ -35,13 +35,17 @@ public class ServicesDB {
 		return repo.findAll();
 	}
 
-	public void update(long id, HolidayBooking booking) {
+	public boolean update(long id, HolidayBooking booking) {
 		HolidayBooking oldBooking = getByid(id);
 		
 		oldBooking.setCountry(booking.getCountry());
 		oldBooking.setWeather(booking.getWeather());
 		oldBooking.setPrice(booking.getPrice());
 		oldBooking.setAllInclusive(booking.isAllInclusive());
+		
+		HolidayBooking updatedBooking = oldBooking;
+		repo.save(updatedBooking);
+		return true;
 		
 		
 	}
@@ -54,6 +58,27 @@ public class ServicesDB {
 
 	public HolidayBooking getByid(long id) {
 		return repo.findById(id).get();
+	}
+	
+	public List<HolidayBooking> getByCountry(String country){
+		return repo.findByCountry(country);
+	}
+
+
+	public List<HolidayBooking> getByPriceGreater(float price){
+		return repo.findByPriceGreaterThan(price);
+	}
+
+	public List<HolidayBooking> getAllInclusive(boolean bool){
+		return repo.findByAllInclusive(bool);
+	}
+
+	public List<HolidayBooking> getAllOrderByCountry(){
+		return repo.findByOrderByCountryAsc();
+	}
+
+	public List<HolidayBooking> getAllOrderByPrice(){
+		return repo.findByOrderByPriceDesc();
 	}
 
 
